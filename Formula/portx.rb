@@ -4,7 +4,7 @@ class Portx < Formula
   url "https://github.com/aushaif/portX.git", branch: "main"
   version "2.2.0"
 
-  depends_on "python@3.12"
+  depends_on "frpc"
 
   # Prevent conflicts with the unrelated PortX.app cask
   conflicts_with cask: "portx"
@@ -13,7 +13,12 @@ class Portx < Formula
     # 1. Install CLI modules to libexec
     libexec.install Dir["cli/*"]
 
-    # 2. Create the standalone executable wrapper
+    # 2. Symlink the frpc binary from the frpc formula into var/portx/bin/
+    frp_bin_dir = var/"portx/bin"
+    frp_bin_dir.mkpath
+    ln_sf Formula["frpc"].opt_bin/"frpc", frp_bin_dir/"frpc"
+
+    # 3. Create the standalone executable wrapper
     (bin/"portx").write <<~PYTHON
       #!/usr/bin/env python3
       """
@@ -31,7 +36,7 @@ class Portx < Formula
 
       # Set FRP binary path for Homebrew installation
       import os
-      os.environ.setdefault("PORTX_FRP_BINARY", "#{var}/portx/bin/frpc")
+      os.environ.setdefault("PORTX_FRP_BINARY", "#{Formula["frpc"].opt_bin}/frpc")
 
       # Import and run the main CLI
       import portx as _portx_main
@@ -40,35 +45,8 @@ class Portx < Formula
           _portx_main.main()
     PYTHON
 
-    # 3. Make the wrapper executable
+    # 4. Make wrapper executable
     chmod 0755, bin/"portx"
-
-    # 4. Download and install FRP binary
-    frp_version = "0.71.0"
-
-    if OS.mac? && Hardware::CPU.arm?
-      frp_url = "https://github.com/fatedier/frp/releases/download/v#{frp_version}/frp_#{frp_version}_darwin_arm64.tar.gz"
-    elsif OS.mac? && Hardware::CPU.intel?
-      frp_url = "https://github.com/fatedier/frp/releases/download/v#{frp_version}/frp_#{frp_version}_darwin_amd64.tar.gz"
-    elsif OS.linux? && Hardware::CPU.arm?
-      frp_url = "https://github.com/fatedier/frp/releases/download/v#{frp_version}/frp_#{frp_version}_linux_arm64.tar.gz"
-    elsif OS.linux? && Hardware::CPU.intel?
-      frp_url = "https://github.com/fatedier/frp/releases/download/v#{frp_version}/frp_#{frp_version}_linux_amd64.tar.gz"
-    else
-      odie "Unsupported OS/architecture"
-    end
-
-    # Download and extract FRP
-    frp_archive = "frp.tar.gz"
-    system "curl", "-fsSL", "-o", frp_archive, frp_url
-    system "tar", "-xzf", frp_archive
-
-    # Copy frpc binary to var/portx/bin/
-    frp_dir = Pathname.new(Dir["frp_*"].first)
-    frp_bin_dir = var/"portx/bin"
-    frp_bin_dir.mkpath
-    cp frp_dir/"frpc", frp_bin_dir/"frpc"
-    chmod 0755, frp_bin_dir/"frpc"
 
     # 5. Create runtime directories
     (var/"portx/tunnels").mkpath
