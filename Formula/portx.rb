@@ -44,13 +44,13 @@ class Portx < Formula
     frp_version = "0.71.0"
     
     if OS.mac? && Hardware::CPU.arm?
-      frp_url = "https://github.com/fatedier/frp/releases/download/v\#{frp_version}/frp_\#{frp_version}_darwin_arm64.tar.gz"
+      frp_url = "https://github.com/fatedier/frp/releases/download/v#{frp_version}/frp_#{frp_version}_darwin_arm64.tar.gz"
     elsif OS.mac? && Hardware::CPU.intel?
-      frp_url = "https://github.com/fatedier/frp/releases/download/v\#{frp_version}/frp_\#{frp_version}_darwin_amd64.tar.gz"
+      frp_url = "https://github.com/fatedier/frp/releases/download/v#{frp_version}/frp_#{frp_version}_darwin_amd64.tar.gz"
     elsif OS.linux? && Hardware::CPU.arm?
-      frp_url = "https://github.com/fatedier/frp/releases/download/v\#{frp_version}/frp_\#{frp_version}_linux_arm64.tar.gz"
+      frp_url = "https://github.com/fatedier/frp/releases/download/v#{frp_version}/frp_#{frp_version}_linux_arm64.tar.gz"
     elsif OS.linux? && Hardware::CPU.intel?
-      frp_url = "https://github.com/fatedier/frp/releases/download/v\#{frp_version}/frp_\#{frp_version}_linux_amd64.tar.gz"
+      frp_url = "https://github.com/fatedier/frp/releases/download/v#{frp_version}/frp_#{frp_version}_linux_amd64.tar.gz"
     else
       odie "Unsupported architecture"
     end
