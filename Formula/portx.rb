@@ -61,10 +61,11 @@ class Portx < Formula
     system "tar", "-xzf", frp_archive
     
     # Find and install frpc binary
-    frp_dir = Dir["frp_*"].first
+    frp_dir = Pathname.new(Dir["frp_*"].first)
     frp_bin_dir = var/"portx/bin"
     frp_bin_dir.mkpath
-    install frp_dir/"frpc", frp_bin_dir/"frpc"
+    cp frp_dir/"frpc", frp_bin_dir/"frpc"
+    chmod 0755, frp_bin_dir/"frpc"
     
     # 5. Create runtime directories
     (var/"portx/tunnels").mkpath
